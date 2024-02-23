@@ -1,3 +1,2 @@
 cairosvg
-opencv-python
 functions_framework

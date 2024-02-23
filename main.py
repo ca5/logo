@@ -1,10 +1,9 @@
 
 import xml.etree.ElementTree as ET
 from cairosvg import svg2png
-import cv2
 import functions_framework
 import flask
-
+from tempfile import NamedTemporaryFile
 
 RAW_LOGO_SVG = '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
@@ -58,21 +57,31 @@ def save_as_png(root, output_path, width, height):
 
 @functions_framework.http
 def main(request: flask.Request) -> flask.typing.ResponseReturnValue:
-    #@title Ca5 Logo Generator
-    output_png_path = 'ca5logo.png'  #@param {type: "string"}
-    output_width = 300  #@param {type: "number"}
-    output_height = 300  #@param {type: "number"}
-    background_color = '#000000'  #@param {type: "string"}
-    c_color = '#00FFFF'  #@param {type: "string"}
-    a_color = '#FFFF00'  #@param {type: "string"}
-    five_color = '#FF00FF'  #@param {type: "string"}
-    #@markdown  default color: #296A01
+    output_png_path = 'ca5logo.png'
+
+    # default setting
+    output_width = 500# 
+    background_color = '296A01'
+    c_color = 'FFFFFF'
+    a_color = 'FFFFFF'
+    five_color = 'FFFFFF'
+
+    request_args = request.args
+    output_width = int(request_args.get('w', output_width))
+    background_color = request_args.get('bg', background_color)
+    c_color = request_args.get('c', c_color)
+    a_color = request_args.get('a', a_color)
+    five_color = request_args.get('5', five_color)
 
     tree = ET.fromstring(RAW_LOGO_SVG)
-    tree = set_svg_background_color(tree, background_color)
-    tree = set_svg_foreground_color(tree, 0, c_color)
-    tree = set_svg_foreground_color(tree, 1, a_color)
-    tree = set_svg_foreground_color(tree, 2, five_color)
-    save_as_png(tree, output_png_path, output_width, output_height)
-    img = cv2.imread(output_png_path, cv2.IMREAD_UNCHANGED)
-    return flask.send_file(output_png_path)
+    tree = set_svg_background_color(tree, "#" + background_color)
+    tree = set_svg_foreground_color(tree, 0, "#" + c_color)
+    tree = set_svg_foreground_color(tree, 1, "#" + a_color)
+    tree = set_svg_foreground_color(tree, 2, "#" + five_color)
+
+    with NamedTemporaryFile() as tmpf:
+        save_as_png(tree, tmpf.name, output_width, output_width)
+        return flask.send_file(
+            tmpf.name,
+            as_attachment=False,
+            download_name="ca5logo.png")
