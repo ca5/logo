@@ -75,8 +75,8 @@ def main(request: flask.Request) -> flask.typing.ResponseReturnValue:
 
     tree = ET.fromstring(RAW_LOGO_SVG)
     tree = set_svg_background_color(tree, "#" + background_color)
-    tree = set_svg_foreground_color(tree, 0, "#" + c_color)
-    tree = set_svg_foreground_color(tree, 1, "#" + a_color)
+    tree = set_svg_foreground_color(tree, 0, "#" + a_color)
+    tree = set_svg_foreground_color(tree, 1, "#" + c_color)
     tree = set_svg_foreground_color(tree, 2, "#" + five_color)
 
     with NamedTemporaryFile() as tmpf:
